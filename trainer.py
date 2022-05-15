@@ -4,6 +4,7 @@ import logger
 import time
 import pandas as pd
 import numpy as np
+import os
 
 class Trainer():
 	def __init__(self,args, splitter, gcn, classifier, comp_loss, dataset, num_classes):
@@ -28,17 +29,31 @@ class Trainer():
 			self.hist_ndFeats_list = [self.tasker.nodes_feats.float()]
 
 	def init_optimizers(self,args):
-		params = self.gcn.parameters()
-		self.gcn_opt = torch.optim.Adam(params, lr = args.learning_rate)
 		params = self.classifier.parameters()
 		self.classifier_opt = torch.optim.Adam(params, lr = args.learning_rate)
+		###
+		opt_params = torch.nn.ParameterList()
+		params = list(self.gcn.parameters().items()) # list of tuples
+		for p in params:
+				opt_params.append(p[1])
+		self.gcn_opt = torch.optim.Adam(opt_params, lr = args.learning_rate)
+		###
 		self.gcn_opt.zero_grad()
 		self.classifier_opt.zero_grad()
 
-	def save_checkpoint(self, state, filename='checkpoint.pth.tar'):
+	def save_checkpoint(self, filename='checkpoint.pth.tar'):
+		all_epoch = self.args.start_epoch + self.args.num_epochs
+		state = {
+      'epoch': all_epoch,
+      'gcn_optimizer': self.gcn_opt.state_dict(),
+      'classifier_optimizer': self.classifier_opt.state_dict(),
+      'classifier_dict': self.classifier.state_dict(),
+      'gcn_dict': self.gcn.state_dict(),
+    }
+		filename = 'checkpoint-' + str(all_epoch) + '.pth.tar'
 		torch.save(state, filename)
 
-	def load_checkpoint(self, filename, model):
+	def load_checkpoint(self, filename, model=None):
 		if os.path.isfile(filename):
 			print("=> loading checkpoint '{}'".format(filename))
 			checkpoint = torch.load(filename)

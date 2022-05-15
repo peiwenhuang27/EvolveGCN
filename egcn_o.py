@@ -5,9 +5,9 @@ import torch.nn as nn
 import math
 
 
-class EGCN(torch.nn.Module):
+class EGCN(nn.Module):
     def __init__(self, args, activation, device='cpu', skipfeats=False):
-        super().__init__()
+        super(EGCN, self).__init__()
         GRCU_args = u.Namespace({})
 
         feats = [args.feats_per_node,
@@ -16,7 +16,8 @@ class EGCN(torch.nn.Module):
         self.device = device
         self.skipfeats = skipfeats
         self.GRCU_layers = []
-        self._parameters = nn.ParameterList()
+        # self._parameters = nn.ParameterList()
+        self._parameters = nn.ParameterDict()
         for i in range(1,len(feats)):
             GRCU_args = u.Namespace({'in_feats' : feats[i-1],
                                      'out_feats': feats[i],
@@ -25,7 +26,18 @@ class EGCN(torch.nn.Module):
             grcu_i = GRCU(GRCU_args)
             #print (i,'grcu_i', grcu_i)
             self.GRCU_layers.append(grcu_i.to(self.device))
-            self._parameters.extend(list(self.GRCU_layers[-1].parameters()))
+
+            ### test
+            # print('\n\nGRCU param')
+            # print(list(self.GRCU_layers[-1].parameters())[0]))
+            #
+            
+            param_list = list(self.GRCU_layers[-1].parameters())
+            for j in range(len(param_list)):
+                param_key = 'layer_' + str(i - 1) + '_' + str(j)
+                self._parameters.update({param_key: param_list[j]})
+
+            # self._parameters.extend(list(self.GRCU_layers[-1].parameters())) #####?????
 
     def parameters(self):
         return self._parameters
@@ -42,9 +54,9 @@ class EGCN(torch.nn.Module):
         return out
 
 
-class GRCU(torch.nn.Module):
+class GRCU(nn.Module):
     def __init__(self,args):
-        super().__init__()
+        super(GRCU, self).__init__()
         self.args = args
         cell_args = u.Namespace({})
         cell_args.rows = args.in_feats
@@ -74,9 +86,9 @@ class GRCU(torch.nn.Module):
 
         return out_seq
 
-class mat_GRU_cell(torch.nn.Module):
+class mat_GRU_cell(nn.Module):
     def __init__(self,args):
-        super().__init__()
+        super(mat_GRU_cell, self).__init__()
         self.args = args
         self.update = mat_GRU_gate(args.rows,
                                    args.cols,
@@ -109,9 +121,9 @@ class mat_GRU_cell(torch.nn.Module):
 
         
 
-class mat_GRU_gate(torch.nn.Module):
+class mat_GRU_gate(nn.Module):
     def __init__(self,rows,cols,activation):
-        super().__init__()
+        super(mat_GRU_gate, self).__init__()
         self.activation = activation
         #the k here should be in_feats which is actually the rows
         self.W = Parameter(torch.Tensor(rows,rows))
@@ -134,9 +146,9 @@ class mat_GRU_gate(torch.nn.Module):
 
         return out
 
-class TopK(torch.nn.Module):
+class TopK(nn.Module):
     def __init__(self,feats,k):
-        super().__init__()
+        super(TopK, self).__init__()
         self.scorer = Parameter(torch.Tensor(feats,1))
         self.reset_param(self.scorer)
         

@@ -349,3 +349,6 @@ class Logger():
         epoch_metric_val = epoch_metric_val.sum()/batch_sizes.sum()
 
         return epoch_metric_val.detach().item()
+
+    def log_str(self, text):
+        logging.info (text)

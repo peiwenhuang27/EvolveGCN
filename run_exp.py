@@ -234,5 +234,6 @@ if __name__ == '__main__':
 						 comp_loss = cross_entropy,
 						 dataset = dataset,
 						 num_classes = tasker.num_classes)
-
+	trainer.load_checkpoint(args.checkpoint)
 	trainer.train()
+	trainer.save_checkpoint()
