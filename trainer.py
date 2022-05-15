@@ -42,7 +42,7 @@ class Trainer():
 		self.classifier_opt.zero_grad()
 
 	def save_checkpoint(self, filename='checkpoint.pth.tar'):
-		all_epoch = self.args.start_epoch + self.args.num_epochs
+		all_epoch = self.last_epoch + self.args.num_epochs
 		state = {
       'epoch': all_epoch,
       'gcn_optimizer': self.gcn_opt.state_dict(),
@@ -57,13 +57,13 @@ class Trainer():
 		if os.path.isfile(filename):
 			print("=> loading checkpoint '{}'".format(filename))
 			checkpoint = torch.load(filename)
-			epoch = checkpoint['epoch']
+			self.last_epoch = checkpoint['epoch']
 			self.gcn.load_state_dict(checkpoint['gcn_dict'])
 			self.classifier.load_state_dict(checkpoint['classifier_dict'])
 			self.gcn_opt.load_state_dict(checkpoint['gcn_optimizer'])
 			self.classifier_opt.load_state_dict(checkpoint['classifier_optimizer'])
 			self.logger.log_str("=> loaded checkpoint '{}' (epoch {})".format(filename, checkpoint['epoch']))
-			return epoch
+			return self.last_epoch
 		else:
 			self.logger.log_str("=> no checkpoint found at '{}'".format(filename))
 			return 0
@@ -74,7 +74,7 @@ class Trainer():
 		eval_valid = 0
 		epochs_without_impr = 0
 
-		for e in range(self.args.num_epochs):
+		for e in range(self.last_epoch + 1, self.last_epoch + self.args.num_epochs + 1): ###
 			eval_train, nodes_embs = self.run_epoch(self.splitter.train, e, 'TRAIN', grad = True)
 			if len(self.splitter.dev)>0 and e>self.args.eval_after_epochs:
 				eval_valid, _ = self.run_epoch(self.splitter.dev, e, 'VALID', grad = False)
