@@ -41,16 +41,15 @@ class Trainer():
 		self.gcn_opt.zero_grad()
 		self.classifier_opt.zero_grad()
 
-	def save_checkpoint(self, filename='checkpoint.pth.tar'):
-		all_epoch = self.last_epoch + self.args.num_epochs
+	def save_checkpoint(self):
 		state = {
-      'epoch': all_epoch,
+      'epoch': self.cur_epoch,
       'gcn_optimizer': self.gcn_opt.state_dict(),
       'classifier_optimizer': self.classifier_opt.state_dict(),
       'classifier_dict': self.classifier.state_dict(),
       'gcn_dict': self.gcn.state_dict(),
     }
-		filename = 'checkpoint-' + str(all_epoch) + '.pth.tar'
+		filename = self.args.model_dir + 'checkpoint-' + str(self.cur_epoch) + '.pth.tar'
 		torch.save(state, filename)
 
 	def load_checkpoint(self, filename, model=None):
@@ -70,11 +69,13 @@ class Trainer():
 
 	def train(self):
 		self.tr_step = 0
+		self.cur_epoch = self.last_epoch
 		best_eval_valid = 0
 		eval_valid = 0
 		epochs_without_impr = 0
 
 		for e in range(self.last_epoch + 1, self.last_epoch + self.args.num_epochs + 1): ###
+			self.cur_epoch = e
 			eval_train, nodes_embs = self.run_epoch(self.splitter.train, e, 'TRAIN', grad = True)
 			if len(self.splitter.dev)>0 and e>self.args.eval_after_epochs:
 				eval_valid, _ = self.run_epoch(self.splitter.dev, e, 'VALID', grad = False)
@@ -87,9 +88,11 @@ class Trainer():
 					if epochs_without_impr>self.args.early_stop_patience:
 						print ('### w'+str(self.args.rank)+') ep '+str(e)+' - Early stop.')
 						break
+			self.save_checkpoint()
 
 			if len(self.splitter.test)>0 and eval_valid==best_eval_valid and e>self.args.eval_after_epochs:
 				eval_test, _ = self.run_epoch(self.splitter.test, e, 'TEST', grad = False)
+				# self.save_checkpoint()
 
 				if self.args.save_node_embeddings:
 					self.save_node_embs_csv(nodes_embs, self.splitter.train_idx, log_file+'_train_nodeembs.csv.gz')
