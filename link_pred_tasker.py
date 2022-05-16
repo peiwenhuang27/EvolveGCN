@@ -102,14 +102,17 @@ class Link_Pred_Tasker():
 											  max_deg,
 											  dataset.num_nodes)
 		else:
-			max_deg,_ = tu.get_max_degs(args,dataset)
-			self.feats_per_node = max_deg + dataset.ext_feats_per_node
+			# max_deg,_ = tu.get_max_degs(args,dataset)
+			# self.feats_per_node = max_deg + dataset.ext_feats_per_node
+			self.feats_per_node = dataset.ext_feats_per_node
+			
 			def get_node_feats(adj):
-				deg_feats = tu.get_1_hot_deg_feats(adj,
-											  max_deg,
-											  dataset.num_nodes)
-				nodes_feats = torch.cat((deg_feats, dataset.ext_node_feats), 1)
-				return nodes_feats
+				# deg_feats = tu.get_1_hot_deg_feats(adj,
+				# 							  max_deg,
+				# 							  dataset.num_nodes)
+				
+        # nodes_feats = torch.cat((deg_feats, dataset.ext_node_feats), 1)
+				return dataset.ext_node_feats # nodes_feats
 
 		return get_node_feats
 
@@ -132,7 +135,7 @@ class Link_Pred_Tasker():
 
 			node_mask = tu.get_node_mask(cur_adj, self.data.num_nodes)
 
-			node_feats = self.get_node_feats(cur_adj)
+			node_feats = self.get_node_feats(cur_adj) #####
 
 			cur_adj = tu.normalize_adj(adj = cur_adj, num_nodes = self.data.num_nodes)
 

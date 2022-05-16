@@ -31,7 +31,7 @@ ECOLS = u.Namespace({'source': 0,
 
 #     return hot_2
 
-def get_1_hot_deg_feats(adj,max_deg,num_nodes):
+def get_1_hot_deg_feats(adj,max_deg,num_nodes,sparse=True): # sparse: to make sparse_tensor or simply tensor indicating degree
     #For now it'll just return a 2-hot vector
     new_vals = torch.ones(adj['idx'].size(0))
     new_adj = {'idx':adj['idx'], 'vals': new_vals}
@@ -41,11 +41,11 @@ def get_1_hot_deg_feats(adj,max_deg,num_nodes):
                                   degs_out.view(-1,1)],dim=1),
                 'vals': torch.ones(num_nodes)}
     
-    # print ('XXX degs_out',degs_out['idx'].size(),degs_out['vals'].size())
     degs_out = u.make_sparse_tensor(degs_out,'long',[num_nodes,max_deg])
 
     hot_1 = {'idx': degs_out._indices().t(),
              'vals': degs_out._values()}
+
     return hot_1
 
 def get_max_degs(args,dataset,all_window=False):

@@ -20,6 +20,7 @@ class Trainer():
 		self.num_classes = num_classes
 
 		self.logger = logger.Logger(args, self.num_classes)
+		self.last_epoch = 0
 
 		self.init_optimizers(args)
 
@@ -108,11 +109,15 @@ class Trainer():
 		self.logger.log_epoch_start(epoch, len(split), set_name, minibatch_log_interval=log_interval)
 
 		torch.set_grad_enabled(grad)
-		for s in split:
+		for s in split: ####
 			if self.tasker.is_static:
 				s = self.prepare_static_sample(s)
 			else:
 				s = self.prepare_sample(s)
+
+      ###
+			# print('\n\nin run_epoch, s.hist_ndFeats_list: ', type(s.hist_ndFeats_list[0]))
+      ###
 
 			predictions, nodes_embs = self.predict(s.hist_adj_list,
 												   s.hist_ndFeats_list,

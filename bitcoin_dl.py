@@ -1,6 +1,7 @@
 import torch
 import pandas as pd
 import utils as u
+import numpy as np
 import os
 
 class bitcoin_dataset():
@@ -94,9 +95,9 @@ class bitcoin_dataset():
         self.num_classes = 2
 
     def load_node_feats(self, feats_filepath):
-        feats = pd.read_csv(feats_filepath).to_numpy()
+        feats = pd.read_csv(feats_filepath, header=None).to_numpy().astype(np.float32) ##
         self.ext_feats_per_node = len(feats[0])
-        self.ext_node_feats = torch.tensor(feats, dtype = torch.long)
+        self.ext_node_feats = torch.from_numpy(feats)
 
     def cluster_negs_and_positives(self,ratings):
         pos_indices = ratings > 0
@@ -134,5 +135,4 @@ class bitcoin_dataset():
         return edges
 
     def prepare_node_feats(self, node_feats):
-        return torch.tensor(node_feats,
-                            torch_size= [self.num_nodes,node_feats.size(1)])
+        return node_feats

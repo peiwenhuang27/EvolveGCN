@@ -16,7 +16,8 @@ class EGCN(torch.nn.Module):
         self.device = device
         self.skipfeats = skipfeats
         self.GRCU_layers = []
-        self._parameters = nn.ParameterList()
+        # self._parameters = nn.ParameterList()
+        self._parameters = nn.ParameterDict()
         for i in range(1,len(feats)):
             GRCU_args = u.Namespace({'in_feats' : feats[i-1],
                                      'out_feats': feats[i],
@@ -25,7 +26,13 @@ class EGCN(torch.nn.Module):
             grcu_i = GRCU(GRCU_args)
             #print (i,'grcu_i', grcu_i)
             self.GRCU_layers.append(grcu_i.to(self.device))
-            self._parameters.extend(list(self.GRCU_layers[-1].parameters()))
+
+            param_list = list(self.GRCU_layers[-1].parameters())
+            for j in range(len(param_list)):
+                param_key = 'layer_' + str(i - 1) + '_' + str(j)
+                self._parameters.update({param_key: param_list[j]})
+
+            # self._parameters.extend(list(self.GRCU_layers[-1].parameters()))
 
     def parameters(self):
         return self._parameters

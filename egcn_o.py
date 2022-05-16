@@ -26,11 +26,6 @@ class EGCN(nn.Module):
             grcu_i = GRCU(GRCU_args)
             #print (i,'grcu_i', grcu_i)
             self.GRCU_layers.append(grcu_i.to(self.device))
-
-            ### test
-            # print('\n\nGRCU param')
-            # print(list(self.GRCU_layers[-1].parameters())[0]))
-            #
             
             param_list = list(self.GRCU_layers[-1].parameters())
             for j in range(len(param_list)):
