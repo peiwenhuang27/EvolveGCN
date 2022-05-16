@@ -43,12 +43,12 @@ class Trainer():
 
 	def save_checkpoint(self):
 		state = {
-      'epoch': self.cur_epoch,
-      'gcn_optimizer': self.gcn_opt.state_dict(),
-      'classifier_optimizer': self.classifier_opt.state_dict(),
-      'classifier_dict': self.classifier.state_dict(),
-      'gcn_dict': self.gcn.state_dict(),
-    }
+			'epoch': self.cur_epoch,
+			'gcn_optimizer': self.gcn_opt.state_dict(),
+			'classifier_optimizer': self.classifier_opt.state_dict(),
+			'classifier_dict': self.classifier.state_dict(),
+			'gcn_dict': self.gcn.state_dict(),
+		}
 		filename = self.args.model_dir + 'checkpoint-' + str(self.cur_epoch) + '.pth.tar'
 		torch.save(state, filename)
 

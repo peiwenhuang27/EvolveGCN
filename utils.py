@@ -72,6 +72,26 @@ def make_sparse_tensor(adj,tensor_type,torch_size):
     else:
         raise NotImplementedError('only make floats or long sparse tensors')
 
+def make_tensor(node_feats,tensor_type,torch_size):
+    if len(torch_size) == 2:
+        tensor_size = torch.Size(torch_size)
+    elif len(torch_size) == 1:
+        tensor_size = torch.Size(torch_size*2)
+
+    if tensor_type == 'float':
+        test = torch.Tensor(node_feats,
+                                      torch.float,
+                                      tensor_size)
+        return torch.Tensor(node_feats,
+                                      torch.float,
+                                      tensor_size)
+    elif tensor_type == 'long':
+        return torch.Tensor(node_feats,
+                                      torch.long,
+                                      tensor_size)
+    else:
+        raise NotImplementedError('only make floats or long tensors')
+
 def sp_to_dict(sp_tensor):
     return  {'idx': sp_tensor._indices().t(),
              'vals': sp_tensor._values()}

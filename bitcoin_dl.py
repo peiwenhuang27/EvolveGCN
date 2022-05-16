@@ -1,9 +1,10 @@
 import torch
+import pandas as pd
 import utils as u
 import os
 
 class bitcoin_dataset():
-    def __init__(self,args):
+    def __init__(self, args):
         assert args.task in ['link_pred', 'edge_cls'], 'bitcoin only implements link_pred or edge_cls'
         self.ecols = u.Namespace({'FromNodeId': 0,
                                   'ToNodeId': 1,
@@ -11,6 +12,11 @@ class bitcoin_dataset():
                                   'TimeStep': 3
                                 })
         args.bitcoin_args = u.Namespace(args.bitcoin_args)
+
+        #load node features
+        self.load_node_feats(args.feats_filepath)
+        # n_feat + max_deg
+        # TODO: betweenness?
 
         #build edge data structure
         edges = self.load_edges(args.bitcoin_args)
@@ -87,6 +93,10 @@ class bitcoin_dataset():
         self.num_nodes = num_nodes
         self.num_classes = 2
 
+    def load_node_feats(self, feats_filepath):
+        feats = pd.read_csv(feats_filepath).to_numpy()
+        self.ext_feats_per_node = len(feats[0])
+        self.ext_node_feats = torch.tensor(feats, dtype = torch.long)
 
     def cluster_negs_and_positives(self,ratings):
         pos_indices = ratings > 0
@@ -94,10 +104,6 @@ class bitcoin_dataset():
         ratings[pos_indices] = 1
         ratings[neg_indices] = -1
         return ratings
-
-    def prepare_node_feats(self,node_feats):
-        node_feats = node_feats[0]
-        return node_feats
 
     def edges_to_sp_dict(self,edges):
         idx = edges[:,[self.ecols.FromNodeId,
@@ -126,3 +132,7 @@ class bitcoin_dataset():
         _, new_edges = new_edges.unique(return_inverse=True)
         edges[:,[self.ecols.FromNodeId,self.ecols.ToNodeId]] = new_edges
         return edges
+
+    def prepare_node_feats(self, node_feats):
+        return torch.tensor(node_feats,
+                            torch_size= [self.num_nodes,self.feats_per_node])

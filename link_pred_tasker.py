@@ -102,8 +102,14 @@ class Link_Pred_Tasker():
 											  max_deg,
 											  dataset.num_nodes)
 		else:
+			max_deg,_ = tu.get_max_degs(args,dataset)
+			self.feats_per_node = max_deg + dataset.ext_feats_per_node
 			def get_node_feats(adj):
-				return dataset.nodes_feats
+				deg_feats = tu.get_1_hot_deg_feats(adj,
+											  max_deg,
+											  dataset.num_nodes)
+				nodes_feats = torch.cat((deg_feats, dataset.ext_node_feats), 1)
+				return nodes_feats
 
 		return get_node_feats
 
