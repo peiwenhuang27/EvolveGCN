@@ -135,4 +135,4 @@ class bitcoin_dataset():
 
     def prepare_node_feats(self, node_feats):
         return torch.tensor(node_feats,
-                            torch_size= [self.num_nodes,self.feats_per_node])
+                            torch_size= [self.num_nodes,node_feats.size(1)])

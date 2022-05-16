@@ -33,7 +33,7 @@ class Link_Pred_Tasker():
 		self.num_classes = 2
 
 		if not (args.use_2_hot_node_feats or args.use_1_hot_node_feats):
-			self.feats_per_node = dataset.feats_per_node
+			self.feats_per_node = dataset.ext_feats_per_node
 
 		self.get_node_feats = self.build_get_node_feats(args,dataset)
 		self.prepare_node_feats = self.build_prepare_node_feats(args,dataset)
