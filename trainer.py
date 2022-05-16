@@ -77,7 +77,7 @@ class Trainer():
 		for e in range(self.last_epoch + 1, self.last_epoch + self.args.num_epochs + 1): ###
 			self.cur_epoch = e
 			eval_train, nodes_embs = self.run_epoch(self.splitter.train, e, 'TRAIN', grad = True)
-			if len(self.splitter.dev)>0 and e>self.args.eval_after_epochs:
+			if len(self.splitter.dev)>0 and (e - self.last_epoch) % self.args.eval_per_n_epochs == 0:  # e>self.args.eval_after_epochs:
 				eval_valid, _ = self.run_epoch(self.splitter.dev, e, 'VALID', grad = False)
 				if eval_valid>best_eval_valid:
 					best_eval_valid = eval_valid
@@ -90,7 +90,7 @@ class Trainer():
 						break
 			self.save_checkpoint()
 
-			if len(self.splitter.test)>0 and eval_valid==best_eval_valid and e>self.args.eval_after_epochs:
+			if len(self.splitter.test)>0 and eval_valid==best_eval_valid and (e - self.last_epoch) % self.args.eval_per_n_epochs == 0: # e>self.args.eval_after_epochs:
 				eval_test, _ = self.run_epoch(self.splitter.test, e, 'TEST', grad = False)
 				# self.save_checkpoint()
 
