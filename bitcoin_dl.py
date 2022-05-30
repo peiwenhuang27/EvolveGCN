@@ -135,4 +135,4 @@ class bitcoin_dataset():
         return edges
 
     def prepare_node_feats(self, node_feats):
-        return node_feats
+        return node_feats[0]
